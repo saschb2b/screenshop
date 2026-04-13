@@ -35,12 +35,28 @@ export interface BackgroundConfig {
   gradientEnd: string;
 }
 
+export interface PhoneLayout {
+  offsetX: number;
+  offsetY: number;
+  rotation: number;
+  scale: number;
+}
+
+export interface TextLayout {
+  x: number;
+  align: "left" | "center";
+  widthRatio: number;
+}
+
 export interface Slide {
   id: string;
   screenshotDataUrl: string | null;
   headline: HeadlineText;
   subtitle: SubtitleText;
   background: BackgroundConfig;
+  phoneLayout: PhoneLayout;
+  textLayout: TextLayout;
+  showPhone: boolean;
 }
 
 export interface EditorState {
@@ -67,6 +83,15 @@ function createSlideFromTemplate(
       ...template.subtitleStyle,
     },
     background: { ...template.background },
+    phoneLayout: {
+      ...template.phoneLayout,
+      ...slidePreset?.phoneLayout,
+    },
+    textLayout: {
+      ...template.textLayout,
+      ...slidePreset?.textLayout,
+    },
+    showPhone: slidePreset?.showPhone ?? true,
   };
 }
 
@@ -80,6 +105,9 @@ export type EditorAction =
   | { type: "UPDATE_HEADLINE"; payload: Partial<HeadlineText> }
   | { type: "UPDATE_SUBTITLE"; payload: Partial<SubtitleText> }
   | { type: "SET_BACKGROUND"; payload: Partial<BackgroundConfig> }
+  | { type: "UPDATE_PHONE_LAYOUT"; payload: Partial<PhoneLayout> }
+  | { type: "UPDATE_TEXT_LAYOUT"; payload: Partial<TextLayout> }
+  | { type: "SET_SHOW_PHONE"; payload: boolean }
   | {
       type: "APPLY_TEMPLATE";
       payload: {
@@ -118,13 +146,11 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
           ...current.headline,
           content: `Screenshot ${String(state.slides.length + 1)}`,
         },
-        subtitle: {
-          ...current.subtitle,
-          content: "",
-        },
-        background: {
-          ...current.background,
-        },
+        subtitle: { ...current.subtitle, content: "" },
+        background: { ...current.background },
+        phoneLayout: { ...current.phoneLayout },
+        textLayout: { ...current.textLayout },
+        showPhone: true,
       };
       return {
         ...state,
@@ -155,6 +181,8 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         headline: { ...source.headline },
         subtitle: { ...source.subtitle },
         background: { ...source.background },
+        phoneLayout: { ...source.phoneLayout },
+        textLayout: { ...source.textLayout },
       };
       const slides = [...state.slides];
       slides.splice(action.payload + 1, 0, dup);
@@ -183,6 +211,24 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
       return updateActiveSlide(state, (s) => ({
         ...s,
         background: { ...s.background, ...action.payload },
+      }));
+
+    case "UPDATE_PHONE_LAYOUT":
+      return updateActiveSlide(state, (s) => ({
+        ...s,
+        phoneLayout: { ...s.phoneLayout, ...action.payload },
+      }));
+
+    case "UPDATE_TEXT_LAYOUT":
+      return updateActiveSlide(state, (s) => ({
+        ...s,
+        textLayout: { ...s.textLayout, ...action.payload },
+      }));
+
+    case "SET_SHOW_PHONE":
+      return updateActiveSlide(state, (s) => ({
+        ...s,
+        showPhone: action.payload,
       }));
 
     case "APPLY_TEMPLATE":

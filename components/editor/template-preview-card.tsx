@@ -6,116 +6,70 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import { Pencil, Download, Plus } from "lucide-react";
 import Link from "next/link";
-import type { TemplatePreset } from "@/lib/presets";
 import { DEFAULT_DEVICE } from "@/lib/devices";
+import type { TemplatePreset } from "@/lib/presets";
+import type { SlideData } from "./slide-renderer";
+import { SlideRenderer } from "./slide-renderer";
 
 interface TemplatePreviewCardProps {
   template: TemplatePreset;
   screenshots: string[];
 }
 
-/**
- * Renders a miniature screenshot slide using the same SVG device frame
- * as the Konva canvas editor. The frame SVG is layered on top of the
- * screenshot image, both positioned to match the device viewport ratios.
- */
+const PREVIEW_SCALE = 0.2;
+const device = DEFAULT_DEVICE;
+
+function buildSlideData(
+  template: TemplatePreset,
+  slideIndex: number,
+  screenshot: string | null,
+): SlideData {
+  const slidePreset = template.slides[slideIndex];
+  return {
+    background: template.background,
+    headline: {
+      content: slidePreset?.headline ?? "",
+      ...template.headlineStyle,
+    },
+    subtitle: {
+      content: slidePreset?.subtitle ?? "",
+      ...template.subtitleStyle,
+    },
+    screenshotDataUrl: screenshot,
+    phoneLayout: {
+      ...template.phoneLayout,
+      ...slidePreset?.phoneLayout,
+    },
+    textLayout: {
+      ...template.textLayout,
+      ...slidePreset?.textLayout,
+    },
+    showPhone: slidePreset?.showPhone ?? true,
+  };
+}
+
 function MiniSlide({
   template,
-  headline,
+  slideIndex,
   screenshot,
 }: {
   template: TemplatePreset;
-  headline: string;
+  slideIndex: number;
   screenshot: string | null;
 }) {
-  const bg =
-    template.background.type === "gradient"
-      ? `linear-gradient(180deg, ${template.background.gradientStart}, ${template.background.gradientEnd})`
-      : template.background.color;
-
-  const device = DEFAULT_DEVICE;
-  const cw = device.canvasWidth;
-  const ch = device.canvasHeight;
-  const vp = device.frame.viewport;
-  const fr = device.frame;
-
-  // Convert device pixel coords to percentages of the canvas
-  const vpLeft = (vp.x / cw) * 100;
-  const vpTop = (vp.y / ch) * 100;
-  const vpWidth = (vp.width / cw) * 100;
-  const vpHeight = (vp.height / ch) * 100;
-
-  const frLeft = (fr.x / cw) * 100;
-  const frTop = (fr.y / ch) * 100;
-  const frWidth = (fr.width / cw) * 100;
-  const frHeight = (fr.height / ch) * 100;
-
-  // Headline area is above the device frame
-  const headlineTop = ((device.frame.y * 0.1) / ch) * 100;
+  const slideData = buildSlideData(template, slideIndex, screenshot);
 
   return (
     <Box
       sx={{
         flex: "0 0 auto",
-        width: { xs: 200, sm: 240, md: 280 },
-        aspectRatio: `${String(cw)} / ${String(ch)}`,
+        width: device.canvasWidth * PREVIEW_SCALE,
+        height: device.canvasHeight * PREVIEW_SCALE,
         borderRadius: 2.5,
-        background: bg,
         overflow: "hidden",
-        position: "relative",
       }}
     >
-      {/* Headline */}
-      <Typography
-        sx={{
-          position: "absolute",
-          top: `${String(headlineTop)}%`,
-          left: "8%",
-          right: "8%",
-          color: template.headlineStyle.color,
-          fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.95rem" },
-          fontWeight: template.headlineStyle.fontWeight,
-          textAlign: "center",
-          lineHeight: 1.25,
-          zIndex: 1,
-        }}
-      >
-        {headline}
-      </Typography>
-
-      {/* Screenshot image clipped to viewport area */}
-      {screenshot && (
-        <Box
-          component="img"
-          src={screenshot}
-          alt=""
-          sx={{
-            position: "absolute",
-            left: `${String(vpLeft)}%`,
-            top: `${String(vpTop)}%`,
-            width: `${String(vpWidth)}%`,
-            height: `${String(vpHeight)}%`,
-            objectFit: "cover",
-            zIndex: 1,
-          }}
-        />
-      )}
-
-      {/* SVG device frame overlay - same file as canvas editor */}
-      <Box
-        component="img"
-        src={`/frames/${device.id}.svg`}
-        alt=""
-        sx={{
-          position: "absolute",
-          left: `${String(frLeft)}%`,
-          top: `${String(frTop)}%`,
-          width: `${String(frWidth)}%`,
-          height: `${String(frHeight)}%`,
-          zIndex: 2,
-          pointerEvents: "none",
-        }}
-      />
+      <SlideRenderer device={device} slide={slideData} scale={PREVIEW_SCALE} />
     </Box>
   );
 }
@@ -125,8 +79,8 @@ function AddSlotPlaceholder() {
     <Box
       sx={{
         flex: "0 0 auto",
-        width: { xs: 200, sm: 240, md: 280 },
-        aspectRatio: `${String(DEFAULT_DEVICE.canvasWidth)} / ${String(DEFAULT_DEVICE.canvasHeight)}`,
+        width: device.canvasWidth * PREVIEW_SCALE,
+        height: device.canvasHeight * PREVIEW_SCALE,
         borderRadius: 2.5,
         border: "2px dashed rgba(255,255,255,0.12)",
         display: "flex",
@@ -269,11 +223,11 @@ export function TemplatePreviewCard({
             },
           }}
         >
-          {slidesToShow.map((slide, i) => (
+          {slidesToShow.map((_, i) => (
             <MiniSlide
               key={i}
               template={template}
-              headline={slide.headline}
+              slideIndex={i}
               screenshot={screenshots[i] ?? null}
             />
           ))}
