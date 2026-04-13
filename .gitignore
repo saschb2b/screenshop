@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# build
+.next/
+out/
+build/
+dist/
+
+# testing
+coverage/
+
+# environment
+.env*.local
+.env
+
+# database
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# misc
+.DS_Store
+*.pem
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# claude
+.claude/settings.local.json
