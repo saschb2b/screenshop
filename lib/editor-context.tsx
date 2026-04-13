@@ -40,6 +40,8 @@ export interface PhoneLayout {
   offsetY: number;
   rotation: number;
   scale: number;
+  /** Y-axis rotation in degrees for 3D perspective effect. 0 = flat/front-facing. */
+  perspectiveAngleY: number;
 }
 
 export interface TextLayout {

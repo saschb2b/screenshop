@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useMemo } from "react";
 import {
   Stage,
   Layer,
@@ -19,6 +20,7 @@ import type {
   PhoneLayout,
   TextLayout,
 } from "@/lib/editor-context";
+import { drawPerspective, computePerspectiveCorners } from "@/lib/perspective";
 
 function DeviceFrameImage({
   src,
@@ -92,7 +94,10 @@ function ScreenshotImage({
   );
 }
 
-function PhoneGroup({
+/**
+ * Flat phone: standard 2D group with offset, rotation, scale.
+ */
+function FlatPhoneGroup({
   frame,
   frameSrc,
   screenshotDataUrl,
@@ -132,6 +137,133 @@ function PhoneGroup({
         height={frame.height}
       />
     </Group>
+  );
+}
+
+/**
+ * Perspective phone: renders the phone (frame + screenshot) onto an offscreen
+ * canvas, then draws it with a perspective warp via triangle subdivision.
+ */
+function PerspectivePhoneGroup({
+  frame,
+  frameSrc,
+  screenshotDataUrl,
+  phoneLayout,
+}: {
+  frame: DeviceFrame;
+  frameSrc: string;
+  screenshotDataUrl: string | null;
+  phoneLayout: PhoneLayout;
+}) {
+  const [frameImage] = useImage(frameSrc, "anonymous");
+  const [screenshotImg] = useImage(screenshotDataUrl ?? "", "anonymous");
+  const offscreenRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Create offscreen canvas on mount
+  useEffect(() => {
+    offscreenRef.current ??= document.createElement("canvas");
+  }, []);
+
+  // The offscreen canvas is sized to just the phone area.
+  // Everything is drawn shifted so the phone frame starts at (0, 0).
+  const ox = frame.x;
+  const oy = frame.y;
+  const ow = frame.width;
+  const oh = frame.height;
+
+  const offscreenReady = useMemo(() => {
+    const canvas = offscreenRef.current;
+    if (!canvas || !frameImage) return false;
+
+    canvas.width = ow;
+    canvas.height = oh;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return false;
+
+    ctx.clearRect(0, 0, ow, oh);
+
+    // Draw screenshot clipped to viewport (shifted to phone-local coords)
+    if (
+      screenshotImg &&
+      screenshotImg.complete &&
+      screenshotImg.naturalWidth > 0
+    ) {
+      const vp = frame.viewport;
+      const localVp = {
+        x: vp.x - ox,
+        y: vp.y - oy,
+        width: vp.width,
+        height: vp.height,
+        radius: vp.radius,
+      };
+      const imgAspect =
+        screenshotImg.naturalWidth / screenshotImg.naturalHeight;
+      const vpAspect = localVp.width / localVp.height;
+
+      let dw: number, dh: number, dx: number, dy: number;
+      if (imgAspect > vpAspect) {
+        dh = localVp.height;
+        dw = localVp.height * imgAspect;
+        dx = localVp.x - (dw - localVp.width) / 2;
+        dy = localVp.y;
+      } else {
+        dw = localVp.width;
+        dh = localVp.width / imgAspect;
+        dx = localVp.x;
+        dy = localVp.y - (dh - localVp.height) / 2;
+      }
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(
+        localVp.x,
+        localVp.y,
+        localVp.width,
+        localVp.height,
+        localVp.radius,
+      );
+      ctx.clip();
+      ctx.drawImage(screenshotImg, dx, dy, dw, dh);
+      ctx.restore();
+    }
+
+    // Draw device frame at (0, 0) on the offscreen canvas
+    ctx.drawImage(frameImage, 0, 0, ow, oh);
+
+    return true;
+  }, [frameImage, screenshotImg, frame, ow, oh, ox, oy]);
+
+  if (!offscreenReady || !offscreenRef.current) return null;
+
+  const offscreen = offscreenRef.current;
+
+  // Compute perspective corners for the phone in its final canvas position
+  const phoneRect = { x: ox, y: oy, width: ow, height: oh };
+  const corners = computePerspectiveCorners(
+    phoneRect,
+    phoneLayout.perspectiveAngleY,
+    1200,
+  );
+
+  // Apply offset
+  const offsetCorners = corners.map(
+    ([cx, cy]) =>
+      [cx + phoneLayout.offsetX, cy + phoneLayout.offsetY] as [number, number],
+  ) as [[number, number], [number, number], [number, number], [number, number]];
+
+  return (
+    <Shape
+      sceneFunc={(context, shape) => {
+        const ctx = context._context;
+        ctx.save();
+
+        // Draw the phone-sized offscreen canvas warped into the perspective quad
+        drawPerspective(ctx, offscreen, ow, oh, offsetCorners, 12);
+
+        ctx.restore();
+        context.fillStrokeShape(shape);
+      }}
+    />
   );
 }
 
@@ -183,6 +315,8 @@ export function SlideRenderer({
   const textWidth = device.canvasWidth * textLayout.widthRatio;
   const textX = textLayout.x;
 
+  const usePerspective = phoneLayout.perspectiveAngleY !== 0;
+
   return (
     <Stage
       ref={stageRef}
@@ -224,13 +358,21 @@ export function SlideRenderer({
         )}
 
         {/* Phone (screenshot + frame) */}
-        {showPhone && (
-          <PhoneGroup
+        {showPhone && !usePerspective && (
+          <FlatPhoneGroup
             frame={device.frame}
             frameSrc={frameSrc}
             screenshotDataUrl={screenshotDataUrl}
             phoneLayout={phoneLayout}
             canvasWidth={device.canvasWidth}
+          />
+        )}
+        {showPhone && usePerspective && (
+          <PerspectivePhoneGroup
+            frame={device.frame}
+            frameSrc={frameSrc}
+            screenshotDataUrl={screenshotDataUrl}
+            phoneLayout={phoneLayout}
           />
         )}
 

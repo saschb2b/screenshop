@@ -47,12 +47,13 @@ export interface TemplatePreset {
   slides: SlidePreset[];
 }
 
-// Default phone: centered, no rotation, full scale
+// Default phone: centered, no rotation, full scale, flat
 const PHONE_CENTER: PhoneLayout = {
   offsetX: 0,
   offsetY: 0,
   rotation: 0,
   scale: 1,
+  perspectiveAngleY: 0,
 };
 
 const PHONE_LEFT: PhoneLayout = {
@@ -60,6 +61,7 @@ const PHONE_LEFT: PhoneLayout = {
   offsetY: 30,
   rotation: 0,
   scale: 0.95,
+  perspectiveAngleY: 0,
 };
 
 const PHONE_RIGHT: PhoneLayout = {
@@ -67,20 +69,34 @@ const PHONE_RIGHT: PhoneLayout = {
   offsetY: 30,
   rotation: 0,
   scale: 0.95,
+  perspectiveAngleY: 0,
 };
 
-const PHONE_TILT_LEFT: PhoneLayout = {
-  offsetX: 60,
+// 3D angled: phone turned to show right side
+const PHONE_3D_RIGHT: PhoneLayout = {
+  offsetX: 80,
   offsetY: 20,
-  rotation: -8,
-  scale: 0.92,
+  rotation: 0,
+  scale: 0.95,
+  perspectiveAngleY: 20,
 };
 
-const PHONE_TILT_RIGHT: PhoneLayout = {
-  offsetX: -60,
+// 3D angled: phone turned to show left side
+const PHONE_3D_LEFT: PhoneLayout = {
+  offsetX: -80,
   offsetY: 20,
-  rotation: 8,
-  scale: 0.92,
+  rotation: 0,
+  scale: 0.95,
+  perspectiveAngleY: -20,
+};
+
+// Subtle 3D tilt
+const PHONE_3D_SUBTLE: PhoneLayout = {
+  offsetX: 40,
+  offsetY: 10,
+  rotation: 0,
+  scale: 0.98,
+  perspectiveAngleY: 12,
 };
 
 const TEXT_CENTER: TextLayout = {
@@ -213,14 +229,14 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       color: "rgba(255,255,255,0.85)",
       y: 210,
     },
-    phoneLayout: PHONE_TILT_LEFT,
+    phoneLayout: PHONE_3D_RIGHT,
     textLayout: TEXT_LEFT,
     slides: [
       { headline: "Your next favorite app", subtitle: "" },
       {
         headline: "Swipe through your day",
         subtitle: "",
-        phoneLayout: PHONE_TILT_RIGHT,
+        phoneLayout: PHONE_3D_LEFT,
       },
       { headline: "Everything in one place", subtitle: "" },
     ],
@@ -250,7 +266,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       color: "rgba(255,255,255,0.7)",
       y: 500,
     },
-    phoneLayout: PHONE_RIGHT,
+    phoneLayout: PHONE_3D_RIGHT,
     textLayout: TEXT_LEFT,
     slides: [
       {
@@ -358,7 +374,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       color: "rgba(0,240,255,0.6)",
       y: 220,
     },
-    phoneLayout: PHONE_TILT_RIGHT,
+    phoneLayout: PHONE_3D_LEFT,
     textLayout: TEXT_LEFT,
     slides: [
       { headline: "Next level productivity", subtitle: "" },
@@ -466,7 +482,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       color: "rgba(224,224,255,0.5)",
       y: 240,
     },
-    phoneLayout: PHONE_TILT_LEFT,
+    phoneLayout: PHONE_3D_LEFT,
     textLayout: TEXT_LEFT,
     slides: [
       {
@@ -531,7 +547,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       color: "rgba(255,255,255,0.8)",
       y: 400,
     },
-    phoneLayout: PHONE_TILT_RIGHT,
+    phoneLayout: PHONE_3D_SUBTLE,
     textLayout: TEXT_LEFT,
     slides: [
       { headline: "Dive deeper", subtitle: "Discover what matters" },
