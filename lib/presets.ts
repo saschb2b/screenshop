@@ -26,110 +26,51 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
   { id: "candy", name: "Candy", start: "#D585FF", end: "#00FFEE" },
 ];
 
+export interface SlidePreset {
+  headline: string;
+  subtitle: string;
+}
+
 export interface TemplatePreset {
   id: string;
   name: string;
   background: BackgroundConfig;
-  headline: Omit<HeadlineText, "content">;
-  subtitle: Omit<SubtitleText, "content">;
+  headlineStyle: Omit<HeadlineText, "content">;
+  subtitleStyle: Omit<SubtitleText, "content">;
+  slides: SlidePreset[];
 }
+
+const DEFAULT_SLIDES: SlidePreset[] = [
+  { headline: "Track your progress effortlessly", subtitle: "" },
+  { headline: "Beautiful analytics at a glance", subtitle: "" },
+  { headline: "Stay organized, stay ahead", subtitle: "" },
+];
 
 export const TEMPLATE_PRESETS: TemplatePreset[] = [
   {
-    id: "bold-gradient",
-    name: "Bold Gradient",
+    id: "gradient-float",
+    name: "Gradient Float",
     background: {
       type: "gradient",
       color: "#6C3CE0",
       gradientStart: "#6C3CE0",
-      gradientEnd: "#E040FB",
+      gradientEnd: "#00BCD4",
     },
-    headline: {
-      fontSize: 88,
+    headlineStyle: {
+      fontSize: 84,
       fontFamily: "Inter",
       fontWeight: 700,
       color: "#FFFFFF",
       y: 100,
     },
-    subtitle: {
-      fontSize: 44,
+    subtitleStyle: {
+      fontSize: 42,
       fontFamily: "Inter",
       fontWeight: 400,
       color: "rgba(255,255,255,0.8)",
       y: 220,
     },
-  },
-  {
-    id: "dark-minimal",
-    name: "Dark Minimal",
-    background: {
-      type: "solid",
-      color: "#111111",
-      gradientStart: "#111111",
-      gradientEnd: "#333333",
-    },
-    headline: {
-      fontSize: 80,
-      fontFamily: "Inter",
-      fontWeight: 800,
-      color: "#FFFFFF",
-      y: 120,
-    },
-    subtitle: {
-      fontSize: 40,
-      fontFamily: "Inter",
-      fontWeight: 400,
-      color: "rgba(255,255,255,0.6)",
-      y: 230,
-    },
-  },
-  {
-    id: "ocean-breeze",
-    name: "Ocean Breeze",
-    background: {
-      type: "gradient",
-      color: "#1A73E8",
-      gradientStart: "#1A73E8",
-      gradientEnd: "#00BCD4",
-    },
-    headline: {
-      fontSize: 84,
-      fontFamily: "Inter",
-      fontWeight: 700,
-      color: "#FFFFFF",
-      y: 110,
-    },
-    subtitle: {
-      fontSize: 42,
-      fontFamily: "Inter",
-      fontWeight: 400,
-      color: "rgba(255,255,255,0.85)",
-      y: 225,
-    },
-  },
-  {
-    id: "sunset-warm",
-    name: "Sunset Warm",
-    background: {
-      type: "gradient",
-      color: "#FF6B35",
-      gradientStart: "#FF6B35",
-      gradientEnd: "#F7C948",
-    },
-    headline: {
-      fontSize: 84,
-      fontFamily: "Inter",
-      fontWeight: 700,
-      color: "#FFFFFF",
-      y: 110,
-    },
-    subtitle: {
-      fontSize: 42,
-      fontFamily: "Inter",
-      fontWeight: 400,
-      color: "rgba(255,255,255,0.9)",
-      y: 225,
-    },
+    slides: DEFAULT_SLIDES,
   },
   {
     id: "clean-white",
@@ -140,68 +81,121 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       gradientStart: "#F5F5F7",
       gradientEnd: "#E8E8ED",
     },
-    headline: {
+    headlineStyle: {
       fontSize: 80,
       fontFamily: "Inter",
       fontWeight: 700,
       color: "#1D1D1F",
-      y: 120,
+      y: 110,
     },
-    subtitle: {
+    subtitleStyle: {
       fontSize: 40,
       fontFamily: "Inter",
       fontWeight: 400,
       color: "#6E6E73",
-      y: 230,
+      y: 225,
     },
+    slides: DEFAULT_SLIDES,
   },
   {
-    id: "neon-night",
-    name: "Neon Night",
+    id: "dark-elegance",
+    name: "Dark Elegance",
+    background: {
+      type: "gradient",
+      color: "#1a1a3e",
+      gradientStart: "#1a1a3e",
+      gradientEnd: "#2d1b69",
+    },
+    headlineStyle: {
+      fontSize: 84,
+      fontFamily: "Inter",
+      fontWeight: 700,
+      color: "#FFFFFF",
+      y: 100,
+    },
+    subtitleStyle: {
+      fontSize: 42,
+      fontFamily: "Inter",
+      fontWeight: 400,
+      color: "rgba(255,255,255,0.7)",
+      y: 220,
+    },
+    slides: DEFAULT_SLIDES,
+  },
+  {
+    id: "sunset-glow",
+    name: "Sunset Glow",
+    background: {
+      type: "gradient",
+      color: "#FF6B35",
+      gradientStart: "#FF512F",
+      gradientEnd: "#F09819",
+    },
+    headlineStyle: {
+      fontSize: 84,
+      fontFamily: "Inter",
+      fontWeight: 800,
+      color: "#FFFFFF",
+      y: 100,
+    },
+    subtitleStyle: {
+      fontSize: 42,
+      fontFamily: "Inter",
+      fontWeight: 400,
+      color: "rgba(255,255,255,0.9)",
+      y: 220,
+    },
+    slides: DEFAULT_SLIDES,
+  },
+  {
+    id: "ocean-deep",
+    name: "Ocean Deep",
+    background: {
+      type: "gradient",
+      color: "#0052D4",
+      gradientStart: "#0052D4",
+      gradientEnd: "#6FB1FC",
+    },
+    headlineStyle: {
+      fontSize: 84,
+      fontFamily: "Inter",
+      fontWeight: 700,
+      color: "#FFFFFF",
+      y: 100,
+    },
+    subtitleStyle: {
+      fontSize: 42,
+      fontFamily: "Inter",
+      fontWeight: 400,
+      color: "rgba(255,255,255,0.85)",
+      y: 220,
+    },
+    slides: DEFAULT_SLIDES,
+  },
+  {
+    id: "neon-pulse",
+    name: "Neon Pulse",
     background: {
       type: "gradient",
       color: "#0F0C29",
       gradientStart: "#0F0C29",
       gradientEnd: "#302B63",
     },
-    headline: {
+    headlineStyle: {
       fontSize: 84,
       fontFamily: "Inter",
       fontWeight: 800,
       color: "#00F0FF",
-      y: 110,
+      y: 100,
     },
-    subtitle: {
+    subtitleStyle: {
       fontSize: 42,
       fontFamily: "Inter",
       fontWeight: 400,
-      color: "rgba(0,240,255,0.7)",
-      y: 225,
+      color: "rgba(0,240,255,0.6)",
+      y: 220,
     },
-  },
-  {
-    id: "rose-soft",
-    name: "Rose Soft",
-    background: {
-      type: "gradient",
-      color: "#ED4264",
-      gradientStart: "#ED4264",
-      gradientEnd: "#FFEDBC",
-    },
-    headline: {
-      fontSize: 84,
-      fontFamily: "Inter",
-      fontWeight: 700,
-      color: "#FFFFFF",
-      y: 110,
-    },
-    subtitle: {
-      fontSize: 42,
-      fontFamily: "Inter",
-      fontWeight: 400,
-      color: "rgba(255,255,255,0.85)",
-      y: 225,
-    },
+    slides: DEFAULT_SLIDES,
   },
   {
     id: "emerald-fresh",
@@ -212,22 +206,52 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
       gradientStart: "#11998E",
       gradientEnd: "#38EF7D",
     },
-    headline: {
+    headlineStyle: {
       fontSize: 84,
       fontFamily: "Inter",
       fontWeight: 700,
       color: "#FFFFFF",
-      y: 110,
+      y: 100,
     },
-    subtitle: {
+    subtitleStyle: {
       fontSize: 42,
       fontFamily: "Inter",
       fontWeight: 400,
       color: "rgba(255,255,255,0.85)",
-      y: 225,
+      y: 220,
     },
+    slides: DEFAULT_SLIDES,
+  },
+  {
+    id: "rose-quartz",
+    name: "Rose Quartz",
+    background: {
+      type: "gradient",
+      color: "#ee9ca7",
+      gradientStart: "#ee9ca7",
+      gradientEnd: "#ffdde1",
+    },
+    headlineStyle: {
+      fontSize: 84,
+      fontFamily: "Inter",
+      fontWeight: 700,
+      color: "#FFFFFF",
+      y: 100,
+    },
+    subtitleStyle: {
+      fontSize: 42,
+      fontFamily: "Inter",
+      fontWeight: 400,
+      color: "rgba(255,255,255,0.85)",
+      y: 220,
+    },
+    slides: DEFAULT_SLIDES,
   },
 ];
+
+export function getTemplateById(id: string): TemplatePreset | undefined {
+  return TEMPLATE_PRESETS.find((t) => t.id === id);
+}
 
 export const FONT_FAMILIES = [
   "Inter",

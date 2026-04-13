@@ -28,8 +28,8 @@ export function TemplatePicker() {
                   type: "APPLY_TEMPLATE",
                   payload: {
                     background: template.background,
-                    headline: template.headline,
-                    subtitle: template.subtitle,
+                    headline: template.headlineStyle,
+                    subtitle: template.subtitleStyle,
                   },
                 })
               }
@@ -53,7 +53,7 @@ export function TemplatePicker() {
               <Typography
                 variant="caption"
                 sx={{
-                  color: template.headline.color,
+                  color: template.headlineStyle.color,
                   fontWeight: 600,
                   fontSize: "0.65rem",
                   textShadow: "0 1px 3px rgba(0,0,0,0.3)",

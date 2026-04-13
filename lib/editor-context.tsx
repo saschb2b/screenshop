@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { DEFAULT_DEVICE, type DeviceConfig } from "./devices";
-import { TEMPLATE_PRESETS } from "./presets";
+import { TEMPLATE_PRESETS, type TemplatePreset } from "./presets";
 
 export interface HeadlineText {
   content: string;
@@ -47,25 +47,26 @@ export interface EditorState {
   device: DeviceConfig;
   slides: Slide[];
   activeSlideIndex: number;
+  templateId: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- TEMPLATE_PRESETS is a static array
-const defaultTemplate = TEMPLATE_PRESETS[0]!;
-
-function createSlide(index: number): Slide {
+function createSlideFromTemplate(
+  template: TemplatePreset,
+  index: number,
+): Slide {
+  const slidePreset = template.slides[index];
   return {
     id: crypto.randomUUID(),
     screenshotDataUrl: null,
     headline: {
-      content:
-        index === 0 ? "Your headline here" : `Screenshot ${String(index + 1)}`,
-      ...defaultTemplate.headline,
+      content: slidePreset?.headline ?? `Screenshot ${String(index + 1)}`,
+      ...template.headlineStyle,
     },
     subtitle: {
-      content: index === 0 ? "Add a subtitle for more context" : "",
-      ...defaultTemplate.subtitle,
+      content: slidePreset?.subtitle ?? "",
+      ...template.subtitleStyle,
     },
-    background: { ...defaultTemplate.background },
+    background: { ...template.background },
   };
 }
 
@@ -109,17 +110,22 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
       return { ...state, activeSlideIndex: action.payload };
 
     case "ADD_SLIDE": {
-      const newSlide = createSlide(state.slides.length);
-      // Copy style from current slide
-      const current = state.slides[state.activeSlideIndex];
-      if (current) {
-        newSlide.background = { ...current.background };
-        newSlide.headline = {
+      const current = getActiveSlide(state);
+      const newSlide: Slide = {
+        id: crypto.randomUUID(),
+        screenshotDataUrl: null,
+        headline: {
           ...current.headline,
-          content: newSlide.headline.content,
-        };
-        newSlide.subtitle = { ...current.subtitle, content: "" };
-      }
+          content: `Screenshot ${String(state.slides.length + 1)}`,
+        },
+        subtitle: {
+          ...current.subtitle,
+          content: "",
+        },
+        background: {
+          ...current.background,
+        },
+      };
       return {
         ...state,
         slides: [...state.slides, newSlide],
@@ -189,11 +195,17 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
   }
 }
 
-const initialState: EditorState = {
-  device: DEFAULT_DEVICE,
-  slides: [createSlide(0)],
-  activeSlideIndex: 0,
-};
+function buildInitialState(template: TemplatePreset): EditorState {
+  return {
+    device: DEFAULT_DEVICE,
+    slides: template.slides.map((_, i) => createSlideFromTemplate(template, i)),
+    activeSlideIndex: 0,
+    templateId: template.id,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- static array
+const fallbackTemplate = TEMPLATE_PRESETS[0]!;
 
 export function getActiveSlide(state: EditorState): Slide {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- activeSlideIndex is always valid
@@ -205,8 +217,18 @@ const EditorDispatchContext = createContext<Dispatch<EditorAction> | null>(
   null,
 );
 
-export function EditorProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(editorReducer, initialState);
+export function EditorProvider({
+  children,
+  template,
+}: {
+  children: ReactNode;
+  template?: TemplatePreset;
+}) {
+  const [state, dispatch] = useReducer(
+    editorReducer,
+    template ?? fallbackTemplate,
+    buildInitialState,
+  );
 
   return (
     <EditorStateContext.Provider value={state}>

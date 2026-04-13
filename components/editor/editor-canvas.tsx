@@ -8,7 +8,7 @@ import {
   Rect,
   Text,
   Image as KonvaImage,
-  Group,
+  Shape,
 } from "react-konva";
 import type Konva from "konva";
 import useImage from "use-image";
@@ -46,7 +46,13 @@ function ScreenshotImage({
   viewport,
 }: {
   dataUrl: string;
-  viewport: { x: number; y: number; width: number; height: number };
+  viewport: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    radius: number;
+  };
 }) {
   const [image] = useImage(dataUrl);
   if (!image) return null;
@@ -71,21 +77,21 @@ function ScreenshotImage({
     drawY = viewport.y - (drawHeight - viewport.height) / 2;
   }
 
+  const { x, y, width, height, radius } = viewport;
+
   return (
-    <Group
-      clipX={viewport.x}
-      clipY={viewport.y}
-      clipWidth={viewport.width}
-      clipHeight={viewport.height}
-    >
-      <KonvaImage
-        image={image}
-        x={drawX}
-        y={drawY}
-        width={drawWidth}
-        height={drawHeight}
-      />
-    </Group>
+    <Shape
+      sceneFunc={(context, shape) => {
+        const ctx = context._context;
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, radius);
+        ctx.clip();
+        ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+        ctx.restore();
+        context.fillStrokeShape(shape);
+      }}
+    />
   );
 }
 

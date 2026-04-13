@@ -11,14 +11,18 @@
       <stop offset="0%" stop-color="rgba(255,255,255,0.08)"/>
       <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
     </linearGradient>
+    <mask id="screenMask">
+      <rect x="-20" y="-20" width="780" height="1560" fill="white"/>
+      <rect x="22" y="22" width="696" height="1476" rx="28" ry="28" fill="black"/>
+    </mask>
   </defs>
-  <!-- Outer body -->
-  <rect x="4" y="4" width="732" height="1512" rx="44" ry="44" fill="url(#bodyGrad)" filter="url(#shadow)"/>
-  <rect x="4" y="4" width="732" height="1512" rx="44" ry="44" fill="url(#bezelHighlight)"/>
+  <!-- Outer body with screen hole -->
+  <g mask="url(#screenMask)">
+    <rect x="4" y="4" width="732" height="1512" rx="44" ry="44" fill="url(#bodyGrad)" filter="url(#shadow)"/>
+    <rect x="4" y="4" width="732" height="1512" rx="44" ry="44" fill="url(#bezelHighlight)"/>
+  </g>
   <rect x="4" y="4" width="732" height="1512" rx="44" ry="44" stroke="#3a3a3a" stroke-width="2.5" fill="none"/>
-  <rect x="20" y="20" width="700" height="1480" rx="30" ry="30" stroke="#222" stroke-width="1.5" fill="none"/>
-  <!-- Screen cutout -->
-  <rect x="22" y="22" width="696" height="1476" rx="28" ry="28" fill="transparent"/>
+  <rect x="22" y="22" width="696" height="1476" rx="28" ry="28" stroke="#222" stroke-width="1.5" fill="none"/>
   <!-- Camera punch hole -->
   <circle cx="370" cy="40" r="10" fill="#111111" stroke="#222" stroke-width="1"/>
   <!-- Right side buttons -->
